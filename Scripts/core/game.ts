@@ -214,9 +214,6 @@ function addControl(controlObject: Control): void {
         }
     });
 
-    gui.add(controlObject, 'stopMovingLight').onChange((flag) => {
-        stopMovingLight = flag;
-    });
 }
 
 // Add Stats Object to the Scene

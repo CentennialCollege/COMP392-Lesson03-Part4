@@ -4,7 +4,7 @@ var objects;
     // CONTROL CLASS ++++++++++++++++++++++++++++++++++++++++++
     var Control = (function () {
         // CONSTRUCTOR ++++++++++++++++++++++++++++++++++++++++
-        function Control(rotationSpeed, bouncingSpeed, ambientColour, pointColour, intensity, distance, exponent, angle, debug, castShadow, onlyShadow, target, stopMovingLight) {
+        function Control(rotationSpeed, bouncingSpeed, ambientColour, pointColour, intensity, distance, exponent, angle, debug, castShadow, onlyShadow, target) {
             this.rotationSpeed = rotationSpeed;
             this.bouncingSpeed = bouncingSpeed;
             this.ambientColour = ambientColour;
@@ -17,7 +17,6 @@ var objects;
             this.castShadow = castShadow;
             this.onlyShadow = onlyShadow;
             this.target = target;
-            this.stopMovingLight = stopMovingLight;
         }
         return Control;
     })();

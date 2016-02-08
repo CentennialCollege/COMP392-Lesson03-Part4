@@ -34,7 +34,7 @@ var scene;
 var renderer;
 var camera;
 var axes;
-var spotLightHelper;
+var directionalLightHelper;
 var cube;
 var plane;
 var sphere;
@@ -72,14 +72,14 @@ function init() {
     scene.add(axes);
     console.log("Added Axis Helper to scene...");
     //Add a Plane to the Scene
-    planeGeometry = new THREE.PlaneGeometry(60, 20, 1, 1);
+    planeGeometry = new THREE.PlaneGeometry(600, 200, 20, 20);
     planeMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff });
-    plane = new gameObject(planeGeometry, planeMaterial, 15, 0, 0);
+    plane = new gameObject(planeGeometry, planeMaterial, 15, -5, 0);
     plane.rotation.x = -0.5 * Math.PI;
     scene.add(plane);
     console.log("Added Plane Primitive to scene...");
     // Add a Cube to the Scene
-    cubeMaterial = new LambertMaterial({ color: 0xff7777 });
+    cubeMaterial = new LambertMaterial({ color: 0xff3333 });
     cubeGeometry = new CubeGeometry(4, 4, 4);
     cube = new gameObject(cubeGeometry, cubeMaterial, -4, 3, 0);
     scene.add(cube);
@@ -104,19 +104,23 @@ function init() {
     target = new Object3D();
     target.position = new Vector3(5, 0, 0);
     // Add a PointLight to the scene
-    pointColour = "#ffffff";
-    spotLight1 = new SpotLight(pointColour);
-    spotLight1.position.set(-40, 60, -10);
-    spotLight1.castShadow = true;
-    spotLight1.shadowCameraNear = 2;
-    spotLight1.shadowCameraFar = 200;
-    spotLight1.shadowCameraFov = 130;
-    spotLight1.target = plane;
-    spotLight1.distance = 0;
-    scene.add(spotLight1);
-    console.log("Added Spot Light 1 to Scene");
+    pointColour = "#ff5808";
+    directionalLight = new DirectionalLight(pointColour);
+    directionalLight.position.set(-40, 60, -10);
+    directionalLight.castShadow = true;
+    directionalLight.shadowCameraNear = 2;
+    directionalLight.shadowCameraFar = 200;
+    directionalLight.shadowCameraLeft = -50;
+    directionalLight.shadowCameraRight = 50;
+    directionalLight.shadowCameraTop = 50;
+    directionalLight.shadowCameraBottom = -50;
+    directionalLight.intensity = 0;
+    directionalLight.shadowMapHeight = 1024;
+    directionalLight.shadowMapWidth = 1024;
+    scene.add(directionalLight);
+    console.log("Added Directional Light to Scene");
     // add the camera helper object to show debug information
-    spotLightHelper = new CameraHelper(spotLight1.shadow.camera);
+    directionalLightHelper = new CameraHelper(directionalLight.shadow.camera);
     // Add a small sphere simulating the pointLight
     sphereLight = new SphereGeometry(0.2);
     sphereLightMaterial = new MeshBasicMaterial({ color: 0xac6c25 });
@@ -127,7 +131,7 @@ function init() {
     console.log("Added a Sphere Light to Scene");
     // add controls
     gui = new GUI();
-    control = new Control(0.03, 0.03, ambientColour, pointColour, 1, 0, 30, 0.1, false, true, false, "Plane", false);
+    control = new Control(0.03, 0.03, ambientColour, pointColour, 0.5, 0, 30, 0.1, false, true, false, "Plane");
     addControl(control);
     // Add framerate stats
     addStatsObject();
@@ -149,47 +153,35 @@ function addControl(controlObject) {
         ambientLight.color = new Color(color);
     });
     gui.addColor(controlObject, 'pointColour').onChange(function (color) {
-        spotLight1.color = new Color(color);
-    });
-    gui.add(controlObject, 'angle', 0, Math.PI * 2).onChange(function (angle) {
-        spotLight1.angle = angle;
+        directionalLight.color = new Color(color);
     });
     gui.add(controlObject, 'intensity', 0, 5).onChange(function (intensity) {
-        spotLight1.intensity = intensity;
-    });
-    gui.add(controlObject, 'distance', 0, 200).onChange(function (distance) {
-        spotLight1.distance = distance;
-    });
-    gui.add(controlObject, 'exponent', 0, 100).onChange(function (exponent) {
-        spotLight1.exponent = exponent;
+        directionalLight.intensity = intensity;
     });
     gui.add(controlObject, 'debug').onChange(function (flag) {
         if (flag) {
-            scene.add(spotLightHelper);
+            scene.add(directionalLightHelper);
         }
         else {
-            scene.remove(spotLightHelper);
+            scene.remove(directionalLightHelper);
         }
     });
     gui.add(controlObject, 'castShadow').onChange(function (flag) {
-        spotLight1.castShadow = flag;
+        directionalLight.castShadow = flag;
     });
     gui.add(controlObject, 'target', ['Plane', 'Sphere', 'Cube']).onChange(function (target) {
         console.log(target);
         switch (target) {
             case "Plane":
-                spotLight1.target = plane;
+                directionalLight.target = plane;
                 break;
             case "Sphere":
-                spotLight1.target = sphere;
+                directionalLight.target = sphere;
                 break;
             case "Cube":
-                spotLight1.target = cube;
+                directionalLight.target = cube;
                 break;
         }
-    });
-    gui.add(controlObject, 'stopMovingLight').onChange(function (flag) {
-        stopMovingLight = flag;
     });
 }
 // Add Stats Object to the Scene
@@ -213,24 +205,11 @@ function gameLoop() {
     sphere.position.x = 20 + (10 * (Math.cos(step)));
     sphere.position.y = 2 + (10 * Math.abs(Math.sin(step)));
     // move the light simulation
-    if (!stopMovingLight) {
-        if (phase > 2 * Math.PI) {
-            invert = invert * -1;
-            phase -= 2 * Math.PI;
-        }
-        else {
-            phase += control.rotationSpeed;
-        }
-        sphereLightMesh.position.z = +(7 * (Math.sin(phase)));
-        sphereLightMesh.position.x = +(14 * (Math.cos(phase)));
-        if (invert < 0) {
-            var pivot = 14;
-            sphereLightMesh.position.x = (invert *
-                (sphereLightMesh.position.x - pivot)) + pivot;
-        }
-        //move pointLight along with SphereLightMesh
-        spotLight1.position.set(sphereLightMesh.position.x, sphereLightMesh.position.y, sphereLightMesh.position.z);
-    }
+    sphereLightMesh.position.z = -8;
+    sphereLightMesh.position.y = +(27 * (Math.sin(step / 3)));
+    sphereLightMesh.position.x = 10 + (26 * (Math.cos(step / 3)));
+    //move pointLight along with SphereLightMesh
+    directionalLight.position.set(sphereLightMesh.position.x, sphereLightMesh.position.y, sphereLightMesh.position.z);
     // render using requestAnimationFrame
     requestAnimationFrame(gameLoop);
     // render the scene
