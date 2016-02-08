@@ -16,13 +16,11 @@ module objects {
         public castShadow: boolean;
         public onlyShadow: boolean;
         public target: string;
-        public stopMovingLight: boolean;
         // CONSTRUCTOR ++++++++++++++++++++++++++++++++++++++++
         constructor(rotationSpeed:number, bouncingSpeed:number, ambientColour:string, 
                     pointColour:string, intensity:number, distance: number,
                     exponent:number, angle:number, debug:boolean, 
-                    castShadow:boolean, onlyShadow:boolean, target:string,
-                    stopMovingLight:boolean) {
+                    castShadow:boolean, onlyShadow:boolean, target:string) {
             this.rotationSpeed = rotationSpeed;
             this.bouncingSpeed = bouncingSpeed;
             this.ambientColour = ambientColour;
@@ -35,7 +33,6 @@ module objects {
             this.castShadow = castShadow;
             this.onlyShadow = onlyShadow;
             this.target = target;
-            this.stopMovingLight = stopMovingLight;
         }
         
     }
